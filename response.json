@@ -1,0 +1,44 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "departmentId": 1,
+      "name": "Data Structures",
+      "code": "ECE102",
+      "description": "Algorithms, lists and more",
+      "createdAt": "2026-05-01T15:42:33.038Z",
+      "updatedAt": "2026-05-01T15:42:33.038Z",
+      "department": {
+        "id": 1,
+        "code": "ECE",
+        "name": "Electronics & Communication",
+        "description": "Circuits, signal processing, telecom",
+        "createdAt": "2026-05-01T15:39:25.006Z",
+        "updatedAt": "2026-05-01T15:39:25.006Z"
+      }
+    },
+    {
+      "id": 2,
+      "departmentId": 1,
+      "name": "Signals",
+      "code": "ECE101",
+      "description": "Analysis of EC signals",
+      "createdAt": "2026-05-01T15:42:33.038Z",
+      "updatedAt": "2026-05-01T15:42:33.038Z",
+      "department": {
+        "id": 1,
+        "code": "ECE",
+        "name": "Electronics & Communication",
+        "description": "Circuits, signal processing, telecom",
+        "createdAt": "2026-05-01T15:39:25.006Z",
+        "updatedAt": "2026-05-01T15:39:25.006Z"
+      }
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": "2",
+    "totalPages": 1
+  }
+}
