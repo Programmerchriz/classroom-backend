@@ -19,8 +19,23 @@ if (!FRONTEND_URL) {
   throw new Error("FRONTEND_URL is required");
 }
 
+const normalizeOrigin = (value: string) => value.trim().replace(/\/+$/, "");
+const allowedOrigins = FRONTEND_URL
+  .split(",")
+  .map(normalizeOrigin)
+  .filter(Boolean);
+
 app.use(cors({
-  origin: FRONTEND_URL,
+  origin: (origin, callback) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const normalizedOrigin = normalizeOrigin(origin);
+    const isAllowed = allowedOrigins.includes(normalizedOrigin);
+
+    return callback(null, isAllowed ? origin : false);
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 }));
