@@ -1,7 +1,7 @@
 import { and, desc, eq, getTableColumns, ilike, or, sql } from "drizzle-orm";
 import express from "express";
 import { db } from "../db/index.js";
-import { classes, subjects, user as teacher } from "../db/schema/index.js";
+import { classes, departments, subjects, user } from "../db/schema/index.js";
 
 const router = express.Router();
 const TRANSIENT_DB_ERROR_CODE = "UND_ERR_CONNECT_TIMEOUT";
@@ -80,7 +80,7 @@ router.get("/", async (req, res) => {
 
     // If teacher filter exists, match teacher name
     if (teacherName) {
-      filterConditions.push(ilike(teacher.name, `%${teacherName}%`));
+      filterConditions.push(ilike(user.name, `%${teacherName}%`));
     }
 
     // Combine all filters using AND if any exist
@@ -91,7 +91,7 @@ router.get("/", async (req, res) => {
         .select({ count: sql<number>`count(*)` })
         .from(classes)
         .leftJoin(subjects, eq(classes.subjectId, subjects.id))
-        .leftJoin(teacher, eq(classes.teacherId, teacher.id))
+        .leftJoin(user, eq(classes.teacherId, user.id))
         .where(whereClause)
     );
 
@@ -102,11 +102,11 @@ router.get("/", async (req, res) => {
         .select({
           ...getTableColumns(classes),
           subject: { ...getTableColumns(subjects) },
-          teacher: { ...getTableColumns(teacher) }
+          teacher: { ...getTableColumns(user) }
         })
         .from(classes)
         .leftJoin(subjects, eq(classes.subjectId, subjects.id))
-        .leftJoin(teacher, eq(classes.teacherId, teacher.id))
+        .leftJoin(user, eq(classes.teacherId, user.id))
         .where(whereClause)
         .orderBy(desc(classes.createdAt))
         .limit(limitPerPage)
@@ -133,6 +133,37 @@ router.get("/", async (req, res) => {
 
     res.status(500).json({ error: "Failed to get classes" });
   }
+});
+
+// Get class details with teacher, subject, and department
+
+router.get("/:id", async (req, res) => {
+  const classId = Number(req.params.id);
+
+  if (!Number.isFinite(classId)) return (res.status(400).json({ error: "No class found" }));
+
+  const [classDetails] = await db
+    .select({
+      ...getTableColumns(classes),
+      subject:{
+        ...getTableColumns(subjects),
+      },
+      department: {
+        ...getTableColumns(departments),
+      },
+      teacher: {
+        ...getTableColumns(user),
+      },
+    })
+    .from(classes)
+    .leftJoin(subjects, eq(classes.subjectId, subjects.id))
+    .leftJoin(user, eq(classes.teacherId, user.id))
+    .leftJoin(departments, eq(subjects.departmentId, departments.id))
+    .where(eq(classes.id, classId))
+  
+  if (!classDetails) return (res.status(404).json({ error: "No class found." }));
+
+  return (res.status(200).json({ data: classDetails }));
 });
 
 router.post("/", async (req, res) => {
